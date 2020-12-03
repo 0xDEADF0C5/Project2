@@ -18,10 +18,6 @@ UDPSock = socket.getprotobyname('udp')
 
 
 def main(targetFile, resultsFile):
-    """
-    main function contains the flow of the logic.
-    returns a tuple of (target, ttl, rtt).
-    """
 
     resultsArray = []
     results = open(resultsFile, 'w')  # this will get a write-only file to put the results into
@@ -39,9 +35,7 @@ def main(targetFile, resultsFile):
 
 
 def initSockets(ttl):
-    """
-    creates sockets (both sending and receiving) and returns them
-    """
+
     # Create the sockets themselves
     sendSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, UDPSock)
     rcvSocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, ICMPSock)
@@ -63,9 +57,6 @@ def targetsInFile(filename):
 
 
 def hopsAndRTTToTarget(destinationHostname):
-    """
-    Finds the number of hops and the RTT to given destination.
-    """
     # destination address and port
     print("Probing '%s'..." % destinationHostname)
     destinationIP = socket.gethostbyname(destinationHostname)
@@ -77,19 +68,19 @@ def hopsAndRTTToTarget(destinationHostname):
     while 1:
         rcvSocket, sendSocket = initSockets(ttl)
 
-        # specify the port and an empty string for the hostname
+        # choose the port, hostname is blank for now
         rcvSocket.bind(("", PORT))
 
-        # send to the destination host (on the same port)
+        # send to host on the same port for the destination
         sendSocket.sendto(b'', (destinationHostname, PORT))
 
-        # placeholders
+        # initialize
         currentIP = None
         currentHostname = None
 
         try:
             # we only need the address part from recvfrom, not the rest of the data
-            packet, currentIP = recv_socket.recvfrom(512)
+            packet, currentIP = rcvSocket.recvfrom(512)
             currentIP = currentIP[0]
 
             payload = len(packet[56:])
@@ -111,7 +102,7 @@ def hopsAndRTTToTarget(destinationHostname):
             recvSocket.close()
             # close connection
 
-        # Print out the servers as they come
+        # print the servers
         if currentIP is not None:
             currentServer = "%s : %s" % (currentIP, currentHostname)
         else:
